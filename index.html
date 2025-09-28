@@ -80,12 +80,20 @@
             padding: 20px;
         }
         .inventory-menu .close-btn {
-            position: absolute;
-            top: 20px;
-            right: 10px;
-            font-size: 30px;
+            display: block;
+            margin: 10px auto; /* Center and place below deposit button */
+            font-size: 40px; /* Increased font size */
+            font-weight: bold; /* Bolder appearance */
             color: #ffd700;
+            background-color: #333; /* Background for contrast */
+            padding: 5px 10px; /* Added padding */
+            border-radius: 5px; /* Rounded corners */
             cursor: pointer;
+            transition: background-color 0.3s; /* Smooth hover transition */
+            width: fit-content;
+        }
+        .inventory-menu .close-btn:hover {
+            background-color: #555; /* Hover effect */
         }
         .inventory {
             max-width: 800px;
@@ -173,6 +181,22 @@
         .notification button:hover {
             background-color: #555;
         }
+        .modal-content .close-btn {
+            display: block;
+            margin: 10px auto; /* Center and place below buttons */
+            font-size: 40px; /* Increased font size */
+            font-weight: bold; /* Bolder appearance */
+            color: #ffd700;
+            background-color: #333; /* Background for contrast */
+            padding: 5px 10px; /* Added padding */
+            border-radius: 5px; /* Rounded corners */
+            cursor: pointer;
+            transition: background-color 0.3s; /* Smooth hover transition */
+            width: fit-content;
+        }
+        .modal-content .close-btn:hover {
+            background-color: #555; /* Hover effect */
+        }
     </style>
 </head>
 <body>
@@ -200,37 +224,37 @@
     </section>
 
     <div class="inventory-menu" id="inventoryMenu">
-        <span class="close-btn" onclick="closeInventory()">&times;</span>
         <section class="inventory">
             <h2>Your Inventory</h2>
             <ul id="inventoryList">
                 <!-- Starts empty -->
             </ul>
             <button id="depositBtn">Deposit</button>
+            <span class="close-btn" onclick="closeInventory()">&times;</span>
         </section>
     </div>
 
     <div id="registerModal">
         <div class="modal-content">
-            <span class="close-btn" onclick="closeRegister()">&times;</span>
             <h2>Register</h2>
             <input type="text" id="regUsername" placeholder="Username (3+ characters)">
             <input type="password" id="regPassword" placeholder="Password">
             <button onclick="register()">Register</button>
             <div id="regError" class="error"></div>
             <div id="regSuccess" class="success"></div>
+            <span class="close-btn" onclick="closeRegister()">&times;</span>
         </div>
     </div>
 
     <div id="loginModal">
         <div class="modal-content">
-            <span class="close-btn" onclick="closeLogin()">&times;</span>
             <h2>Login</h2>
             <input type="text" id="loginUsername" placeholder="Username">
             <input type="password" id="loginPassword" placeholder="Password">
             <button onclick="login()">Login</button>
             <div id="loginError" class="error"></div>
             <div id="loginSuccess" class="success"></div>
+            <span class="close-btn" onclick="closeLogin()">&times;</span>
         </div>
     </div>
 
@@ -241,6 +265,7 @@
             <button onclick="submitDeposit()">Submit</button>
             <button onclick="closeModal()">Cancel</button>
             <div id="depositError" class="error"></div>
+            <span class="close-btn" onclick="closeModal()">&times;</span>
         </div>
     </div>
 
@@ -277,14 +302,20 @@
             {"name": "Strawberry Elephant", "mps": "250M"}
         ];
 
-        const players = ['StopGamblingNow', 'ExclusiveRelax', 'imtheking_lol6', 'cornelis735', 'Godzilla63616'];
+        const players = [
+            'yikoo1211', 'shadjs', 'tumber', 'ultron2', 'yezeey', 
+            'Nike', 'Ghostsjf14', 'member1294', 'noobinipizzanini', 
+            'xZestyy420', 'BlazeRiser', 'KoolKid88', 'ShadowNinja23', 
+            'PizzaLad99', 'VibeCheckr', 'RobloxianX7', 'FizzyPop123', 
+            'MegaFlipper07'
+        ];
 
         function parseMpsValue(mps) {
             const value = parseFloat(mps.replace(/[Mk]/g, ''));
             return mps.includes('M') ? value * 1e6 : value * 1e3;
         }
 
-        function formatNumber(num) {en
+        function formatNumber(num) {
             if (num >= 1e6) {
                 return (num / 1e6).toFixed(1).replace(/\.0$/, '') + 'M';
             } else if (num >= 1e3) {
